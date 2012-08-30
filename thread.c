@@ -1193,30 +1193,17 @@ thread_apply_all_command (char *cmd, int from_tty)
      execute_command.  */
   saved_cmd = xstrdup (cmd);
   make_cleanup (xfree, saved_cmd);
-   
-  for ( tp = thread_list; tp; )
-  {
+  for (tp = thread_list; tp; tp = tp->next)
     if (thread_alive (tp))
       {
 	switch_to_thread (tp->ptid);
 
 	printf_filtered (_("\nThread %d (%s):\n"),
 			 tp->num, target_pid_to_str (inferior_ptid));
-	
 	execute_command (cmd, from_tty);
-	/* Restore exact command used
+	strcpy (cmd, saved_cmd);	/* Restore exact command used
 					   previously.  */
-	strcpy (cmd, saved_cmd);
-
-	tp = tp->next;
-	update_thread_list ();
-	for( tptmp = thread_list; tptmp && tptmp != tp; tptmp=tptmp->next );
-
-	if( !tptmp )
-          tp = thread_list;
-
-       }
-  }
+      }
 
   do_cleanups (old_chain);
 }
